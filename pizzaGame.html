@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>משחק שברי פיצה</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .fraction-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .pizza-wrapper {
+            display: flex;
+            align-items: center;
+            margin: 0 20px;
+        }
+
+        .pizza {
+            width: 150px;
+            height: 150px;
+        }
+
+        .fraction-text {
+            margin-right: 10px;
+            font-size: 20px;
+        }
+
+        .fraction {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .numerator {
+            font-size: 20px;
+        }
+
+        .denominator {
+            font-size: 20px;
+            border-top: 1px solid black;
+            padding-top: 2px;
+        }
+
+        input {
+            width: 50px;
+            font-size: 20px;
+            text-align: center;
+        }
+
+        .comparison-symbol {
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        #message {
+            margin-top: 20px;
+            font-size: 20px;
+            color: green;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>משחק שברי פיצה</h1>
+    <p>מלאו את מגשי הפיצה בשברים והשוו ביניהם!</p>
+
+    <div class="fraction-container">
+        <div class="pizza-wrapper">
+            <div class="pizza" id="pizza1"></div>
+            <div class="fraction-text" id="fractionText1">
+                <div class="fraction" id="fractionDisplay1">
+                    <div class="numerator" id="numerator1"></div>
+                    <div class="denominator" id="denominator1"></div>
+                </div>
+            </div>
+        </div>
+        <div class="comparison-symbol" id="comparison">=</div>
+        <div class="pizza-wrapper">
+            <div class="pizza" id="pizza2"></div>
+            <div class="fraction-text" id="fractionText2">
+                <div class="fraction" id="fractionDisplay2">
+                    <div class="numerator" id="numerator2"></div>
+                    <div class="denominator" id="denominator2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <label for="total1">מכנה:</label>
+        <input type="number" id="total1" min="1" max="10" value="4" onchange="updatePizza()">
+        <label for="fraction1">מונה:</label>
+        <input type="number" id="fraction1" min="0" max="10" value="0" onchange="updatePizza()">
+        &nbsp; מול &nbsp;
+        <label for="total2">מכנה:</label>
+        <input type="number" id="total2" min="1" max="10" value="4" onchange="updatePizza()">
+        <label for="fraction2">מונה:</label>
+        <input type="number" id="fraction2" min="0" max="10" value="0" onchange="updatePizza()">
+    </div>
+
+    <div id="message"></div>
+
+    <script>
+        function updatePizza() {
+            const fraction1 = parseInt(document.getElementById('fraction1').value);
+            const total1 = parseInt(document.getElementById('total1').value);
+            const fraction2 = parseInt(document.getElementById('fraction2').value);
+            const total2 = parseInt(document.getElementById('total2').value);
+
+            const pizza1 = document.getElementById('pizza1');
+            const pizza2 = document.getElementById('pizza2');
+            const comparisonSymbol = document.getElementById('comparison');
+            const message = document.getElementById('message');
+            const numerator1 = document.getElementById('numerator1');
+            const denominator1 = document.getElementById('denominator1');
+            const numerator2 = document.getElementById('numerator2');
+            const denominator2 = document.getElementById('denominator2');
+
+            // Clear existing SVG elements
+            pizza1.innerHTML = '';
+            pizza2.innerHTML = '';
+
+            // Function to create an SVG pizza slice
+            function createSlice(radius, startAngle, endAngle, isFilled, pizzaNum) {
+                const largeArcFlag = endAngle - startAngle <= 180 ? 0 : 1;
+                const x1 = radius * Math.cos(startAngle * Math.PI / 180);
+                const y1 = radius * Math.sin(startAngle * Math.PI / 180);
+                const x2 = radius * Math.cos(endAngle * Math.PI / 180);
+                const y2 = radius * Math.sin(endAngle * Math.PI / 180);
+
+                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                path.setAttribute("d", `M 0 0 L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2} Z`);
+                path.setAttribute("fill", isFilled ? (pizzaNum === 1 ? "rgba(174, 213, 129, 0.8)" : "rgba(240, 174, 160, 0.8)") : "none");
+                path.setAttribute("stroke", "black");
+                path.setAttribute("stroke-dasharray", "3 3"); // Always dotted
+                return path;
+            }
+
+            // Add slices to pizza1
+            const svg1 = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            svg1.setAttribute("width", "150");
+            svg1.setAttribute("height", "150");
+            svg1.setAttribute("viewBox", "-75 -75 150 150");
+            for (let i = 0; i < total1; i++) {
+                const startAngle = (360 / total1) * i;
+                const endAngle = (360 / total1) * (i + 1);
+                const slice = createSlice(75, startAngle, endAngle, i < fraction1, 1);
+                svg1.appendChild(slice);
+            }
+            pizza1.appendChild(svg1);
+
+            // Add slices to pizza2
+            const svg2 = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            svg2.setAttribute("width", "150");
+            svg2.setAttribute("height", "150");
+            svg2.setAttribute("viewBox", "-75 -75 150 150");
+            for (let i = 0; i < total2; i++) {
+                const startAngle = (360 / total2) * i;
+                const endAngle = (360 / total2) * (i + 1);
+                const slice = createSlice(75, startAngle, endAngle, i < fraction2, 2);
+                svg2.appendChild(slice);
+            }
+            pizza2.appendChild(svg2);
+
+            // Display fractions
+            numerator1.textContent = fraction1;
+            denominator1.textContent = total1;
+            numerator2.textContent = fraction2;
+            denominator2.textContent = total2;
+
+            // Compare fractions
+            if (fraction1 / total1 > fraction2 / total2) {
+                comparisonSymbol.innerHTML = '>';
+                message.textContent = "לפיצה 1 יש יותר פרוסות!";
+            } else if (fraction1 / total1 < fraction2 / total2) {
+                comparisonSymbol.innerHTML = '<';
+                message.textContent = "לפיצה 2 יש יותר פרוסות!";
+            } else {
+                comparisonSymbol.innerHTML = '=';
+                message.textContent = "שתי הפיצות זהות!";
+            }
+        }
+
+        // Initial update
+        updatePizza();
+    </script>
+
+</body>
+
+</html>
